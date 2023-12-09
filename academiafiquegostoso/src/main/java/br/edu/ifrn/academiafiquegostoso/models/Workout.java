@@ -106,6 +106,32 @@ public class Workout {
         return workouts;
     }
     
+    public static Workout buscar(JdbcTemplate jdbc, int id){
+        Workout w = new Workout();
+        jdbc.query("SELECT * FROM workouts WHERE id_Workouts = ?;", (ps) -> {ps.setInt(1, id);}, (rs) -> {
+            w.setId(rs.getInt("id_Workouts"));
+            w.setName(rs.getString("name"));
+            w.setCharge(rs.getDouble("charge"));
+            w.setIntensity(rs.getString("intensity"));
+            w.setRepetitions(rs.getInt("repetitions"));
+            w.setMachine(rs.getString("machine"));
+            w.setUser(User.buscar(jdbc, rs.getInt("id_User")));
+        });
+        return w;
+    }
+
+    public void update(JdbcTemplate jdbc, int id, int idUser){
+        jdbc.update("UPDATE workouts SET name = ?, intensity = ?, charge = ?, repetitions = ?, machine = ?, id_User = ? WHERE id_Workouts = ?;", (ps) -> {
+            ps.setString(1, name);
+            ps.setString(2, intensity);
+            ps.setDouble(3, charge);
+            ps.setInt(4, repetitions);
+            ps.setString(5, machine);
+            ps.setInt(6, idUser);
+            ps.setInt(7, id);
+        });
+    }
+
     public static void delete(JdbcTemplate jdbc, int id){
         jdbc.update("DELETE FROM workouts WHERE id_Workouts = ?;", (ps) -> {
             ps.setInt(1, id);

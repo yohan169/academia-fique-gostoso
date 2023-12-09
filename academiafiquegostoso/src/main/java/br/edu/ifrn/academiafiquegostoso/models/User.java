@@ -19,7 +19,7 @@ public class User {
         this.email = email;
         this.weight = weight;
         this.height = height;
-        this.imc = weight/(height*height);
+        this.imc = (weight/(height*height))*10000;
         this.plan = plan;
         workouts = new ArrayList<Workout>();
     }
@@ -27,6 +27,7 @@ public class User {
         this.name = name;
         this.weight = weight;
         this.height = height;
+        this.imc = (weight/(height*height))*10000;
         this.plan = plan;
         workouts = new ArrayList<Workout>();
     }
@@ -136,26 +137,13 @@ public class User {
         });
     }
 
-    public static void edit(JdbcTemplate jdbc, int id, String name, String email, double weight, double height, String plan){
+    public void update(JdbcTemplate jdbc){
         jdbc.update("UPDATE users SET name = ?, email = ?, weight = ?, height = ?, imc = ?, plan = ? WHERE id_Users = ?;", (ps) -> {
             ps.setString(1, name);
             ps.setString(2, email);
             ps.setDouble(3, weight);
             ps.setDouble(4, height);
-            ps.setDouble(5, (weight/(height*height)));
-            ps.setString(6, plan);
-            ps.setInt(7, id);
-        });
-    }
-
-    public void update(JdbcTemplate jdbc)
-    {
-        jdbc.update("UPDATE users SET name = ?, email = ?, weight = ?, height = ?, imc = ?, plan = ? WHERE id_Users = ?;", (ps) -> {
-            ps.setString(1, name);
-            ps.setString(2, email);
-            ps.setDouble(3, weight);
-            ps.setDouble(4, height);
-            ps.setDouble(5, (weight/(height*height)));
+            ps.setDouble(5, imc);
             ps.setString(6, plan);
             ps.setInt(7, id);
         });

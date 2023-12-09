@@ -20,8 +20,8 @@ public class AuthController {
         return "index";
     }
 
-    @PostMapping("/auth/adduser")
-    public String addUser(String name, String email, double weight, double height, String plan, Model model){
+    @PostMapping("/auth/adduser/")
+    public String addUser(String name, String email, double weight, double height, String plan){
         User u = new User(name, email, weight, height, plan);
         u.create(jdbc);
         return "redirect:/";
