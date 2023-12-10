@@ -12,6 +12,7 @@
     <main class="container">
         <section>
             <h2>Adicionar usuário</h2>
+            <p th:text="${msg != null ? msg : ''}"></p>
             <form th:action="${usered == null ? '/auth/adduser/' : '/auth/edituser/'}" method="post" class="row g-3">
                 <div class="col-md-6">
                     <label for="id" class="form-label">ID</label>

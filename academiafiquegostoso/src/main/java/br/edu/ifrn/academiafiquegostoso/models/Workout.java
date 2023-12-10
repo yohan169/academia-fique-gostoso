@@ -2,6 +2,7 @@ package br.edu.ifrn.academiafiquegostoso.models;
 
 import java.util.ArrayList;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 public class Workout {
@@ -136,5 +137,16 @@ public class Workout {
         jdbc.update("DELETE FROM workouts WHERE id_Workouts = ?;", (ps) -> {
             ps.setInt(1, id);
         });
+    }
+
+    public static void deleteAll(JdbcTemplate jdbc, int idUser){
+        try{
+            jdbc.update("DELETE FROM workouts WHERE id_User = ?;", (ps) -> {
+                ps.setInt(1, idUser);
+            });
+        }
+        catch(DataAccessException dae){
+            System.out.println(dae.getMessage());
+        }
     }
 }

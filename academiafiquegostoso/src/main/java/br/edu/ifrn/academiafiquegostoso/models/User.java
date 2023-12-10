@@ -2,7 +2,7 @@ package br.edu.ifrn.academiafiquegostoso.models;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
-
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 public class User {
@@ -83,22 +83,30 @@ public class User {
     public void addWorkout(Workout workout){
         workouts.add(workout);
     }
-
+    
     //CRUD
-    public void create(JdbcTemplate jdbc) {
-        jdbc.update("INSERT INTO users (name, email, weight, height, imc, plan) VALUES (?,?,?,?,?,?);", (ps) -> {
-            ps.setString(1, name);
-            ps.setString(2, email);
-            ps.setDouble(3, weight);
-            ps.setDouble(4, height);
-            ps.setDouble(5, imc);
-            ps.setString(6, plan);
-        });
+    public String create(JdbcTemplate jdbc) {
+        String msg = "Usuário adicionado com sucesso";
+        try{
+            jdbc.update("INSERT INTO users (name, email, weight, height, imc, plan) VALUES (?,?,?,?,?,?);", (ps) -> {
+                ps.setString(1, name);
+                ps.setString(2, email);
+                ps.setDouble(3, weight);
+                ps.setDouble(4, height);
+                ps.setDouble(5, imc);
+                ps.setString(6, plan);
+            });
+            return msg;
+        }
+        catch(DataAccessException dae){
+            System.out.println(dae.getMessage());
+            msg = "Erro ao adicionar o usuário";
+            return msg;
+        }
     }
     
     public static ArrayList<User> read(JdbcTemplate jdbc) {
-        String sql = "SELECT * FROM users";
-        ArrayList<User> users = jdbc.query(sql, (rs) -> {
+        ArrayList<User> users = jdbc.query("SELECT * FROM users", (rs) -> {
             ArrayList<User> userList = new ArrayList<>();
             while (rs.next()) {
                 User u = new User(
@@ -115,37 +123,61 @@ public class User {
         return users;
     }
 
+    
     public static User buscar(JdbcTemplate jdbc, int id){
         AtomicReference<User> user = new AtomicReference<>();
-        jdbc.query("SELECT * FROM users WHERE id_Users = ?;", (ps) -> {ps.setInt(1, id);}, (rs) -> {
-            User u = new User(
-                    rs.getString("name"),
-                    rs.getString("email"),
-                    rs.getDouble("weight"),
-                    rs.getDouble("height"),
-                    rs.getString("plan")
-                );
+        User u = new User();
+        try{
+            jdbc.query("SELECT * FROM users WHERE id_Users = ?;", (ps) -> {ps.setInt(1, id);}, (rs) -> {
+                u.setName(rs.getString("name"));
+                u.setEmail(rs.getString("email"));
+                u.setWeight(rs.getDouble("weight"));
+                u.setHeight(rs.getDouble("height"));
+                u.setPlan(rs.getString("plan"));
                 u.setId(rs.getInt("id_Users"));
-            user.set(u);
-        });
-        return user.get();
+                user.set(u);
+            });
+            return user.get();
+        }
+        catch(DataAccessException dae){
+            System.out.println(dae.getMessage());
+            return null;
+        }
     }
 
-    public static void delete(JdbcTemplate jdbc, int id){
-        jdbc.update("DELETE FROM users WHERE id_Users = ?;", (ps) -> {
-            ps.setInt(1, id);
-        });
+    public static String delete(JdbcTemplate jdbc, int id){
+        String msg = "Usuário excluído com sucesso";
+        try{
+            jdbc.update("DELETE FROM users WHERE id_Users = ?;", (ps) -> {
+                ps.setInt(1, id);
+            });
+            return msg;
+        }
+        catch(DataAccessException dae){
+            System.out.println(dae.getMessage());
+            msg = "Erro ao excluir o usuário";
+            return msg;
+        }
     }
 
-    public void update(JdbcTemplate jdbc){
-        jdbc.update("UPDATE users SET name = ?, email = ?, weight = ?, height = ?, imc = ?, plan = ? WHERE id_Users = ?;", (ps) -> {
-            ps.setString(1, name);
-            ps.setString(2, email);
-            ps.setDouble(3, weight);
-            ps.setDouble(4, height);
-            ps.setDouble(5, imc);
-            ps.setString(6, plan);
-            ps.setInt(7, id);
-        });
+    public String update(JdbcTemplate jdbc){
+        String msg = "Usuário editado com sucesso";
+        try{
+            jdbc.update("UPDATE users SET name = ?, email = ?, weight = ?, height = ?, imc = ?, plan = ? WHERE id_Users = ?;", (ps) -> {
+                ps.setString(1, name);
+                ps.setString(2, email);
+                ps.setDouble(3, weight);
+                ps.setDouble(4, height);
+                ps.setDouble(5, imc);
+                ps.setString(6, plan);
+                ps.setInt(7, id);
+            });
+            return msg;
+        }
+        catch(DataAccessException dae){
+            System.out.println(dae.getMessage());
+            msg = "Erro ao editar o usuário";
+            return msg;
+        }
     }
 }
