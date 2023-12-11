@@ -75,68 +75,106 @@ public class Workout {
 
 
     //CRUD
-    public void create(JdbcTemplate jdbc){
-        jdbc.update("INSERT INTO workouts (name, charge , repetitions, intensity, machine, id_User) VALUES(?,?,?,?,?,?);", (ps) -> {
-            ps.setString(1, name);
-            ps.setDouble(2, charge);
-            ps.setInt(3, repetitions);
-            ps.setString(4, intensity);
-            ps.setString(5, machine);
-            ps.setInt(6, user.getId());
-        });
+    public String create(JdbcTemplate jdbc){
+        String msg = "Treino adicionado com sucesso";
+        try{
+            jdbc.update("INSERT INTO workouts (name, charge , repetitions, intensity, machine, id_User) VALUES(?,?,?,?,?,?);", (ps) -> {
+                ps.setString(1, name);
+                ps.setDouble(2, charge);
+                ps.setInt(3, repetitions);
+                ps.setString(4, intensity);
+                ps.setString(5, machine);
+                ps.setInt(6, user.getId());
+            });
+            return msg;
+        }
+        catch(DataAccessException dae){
+            System.out.println(dae.getMessage());
+            msg = "Erro ao adicionar o treino";
+            return msg;
+        }
     }
 
     public static ArrayList<Workout> read(JdbcTemplate jdbc, int id){
-        String sql = "SELECT * FROM workouts WHERE id_User = ?;";
-        ArrayList<Workout> workouts = jdbc.query(sql, (ps) -> {ps.setInt(1, id);}, (rs) -> {
-            ArrayList<Workout> list = new ArrayList<>();
-            while(rs.next()){
-                Workout w = new Workout(
-                    rs.getString("name"), 
-                    rs.getString("intensity"),
-                    rs.getDouble("charge"),
-                    rs.getInt("repetitions"),
-                    rs.getString("machine")
-                );
-                w.setId(rs.getInt("id_Workouts"));
-                w.setUser(User.buscar(jdbc, id));
-                list.add(w);
-            }
-            return list;
-        });
-        return workouts;
+        try{
+            ArrayList<Workout> workouts = jdbc.query("SELECT * FROM workouts WHERE id_User = ?;", (ps) -> {ps.setInt(1, id);}, (rs) -> {
+                ArrayList<Workout> list = new ArrayList<>();
+                while(rs.next()){
+                    Workout w = new Workout(
+                        rs.getString("name"), 
+                        rs.getString("intensity"),
+                        rs.getDouble("charge"),
+                        rs.getInt("repetitions"),
+                        rs.getString("machine")
+                    );
+                    w.setId(rs.getInt("id_Workouts"));
+                    w.setUser(User.buscar(jdbc, id));
+                    list.add(w);
+                }
+                return list;
+            });
+            return workouts;
+        }
+        catch(DataAccessException dae){
+            System.out.println(dae.getMessage());
+            return null;
+        }
     }
     
     public static Workout buscar(JdbcTemplate jdbc, int id){
-        Workout w = new Workout();
-        jdbc.query("SELECT * FROM workouts WHERE id_Workouts = ?;", (ps) -> {ps.setInt(1, id);}, (rs) -> {
-            w.setId(rs.getInt("id_Workouts"));
-            w.setName(rs.getString("name"));
-            w.setCharge(rs.getDouble("charge"));
-            w.setIntensity(rs.getString("intensity"));
-            w.setRepetitions(rs.getInt("repetitions"));
-            w.setMachine(rs.getString("machine"));
-            w.setUser(User.buscar(jdbc, rs.getInt("id_User")));
-        });
-        return w;
+        try{
+            Workout w = new Workout();
+            jdbc.query("SELECT * FROM workouts WHERE id_Workouts = ?;", (ps) -> {ps.setInt(1, id);}, (rs) -> {
+                w.setId(rs.getInt("id_Workouts"));
+                w.setName(rs.getString("name"));
+                w.setCharge(rs.getDouble("charge"));
+                w.setIntensity(rs.getString("intensity"));
+                w.setRepetitions(rs.getInt("repetitions"));
+                w.setMachine(rs.getString("machine"));
+                w.setUser(User.buscar(jdbc, rs.getInt("id_User")));
+            });
+            return w;
+        }
+        catch(DataAccessException dae){
+            System.out.println(dae.getMessage());
+            return null;
+        }
     }
 
-    public void update(JdbcTemplate jdbc, int id, int idUser){
-        jdbc.update("UPDATE workouts SET name = ?, intensity = ?, charge = ?, repetitions = ?, machine = ?, id_User = ? WHERE id_Workouts = ?;", (ps) -> {
-            ps.setString(1, name);
-            ps.setString(2, intensity);
-            ps.setDouble(3, charge);
-            ps.setInt(4, repetitions);
-            ps.setString(5, machine);
-            ps.setInt(6, idUser);
-            ps.setInt(7, id);
-        });
+    public String update(JdbcTemplate jdbc, int id, int idUser){
+        String msg = "Treino editado com sucesso";
+        try{
+            jdbc.update("UPDATE workouts SET name = ?, intensity = ?, charge = ?, repetitions = ?, machine = ?, id_User = ? WHERE id_Workouts = ?;", (ps) -> {
+                ps.setString(1, name);
+                ps.setString(2, intensity);
+                ps.setDouble(3, charge);
+                ps.setInt(4, repetitions);
+                ps.setString(5, machine);
+                ps.setInt(6, idUser);
+                ps.setInt(7, id);
+            });
+            return msg;
+        }
+        catch(DataAccessException dae){
+            System.out.println(dae.getMessage());
+            msg = "Erro ao ediat o treino";
+            return msg;
+        }
     }
 
-    public static void delete(JdbcTemplate jdbc, int id){
-        jdbc.update("DELETE FROM workouts WHERE id_Workouts = ?;", (ps) -> {
-            ps.setInt(1, id);
-        });
+    public static String delete(JdbcTemplate jdbc, int id){
+        String msg = "Treino excluído com sucesso";
+        try{
+            jdbc.update("DELETE FROM workouts WHERE id_Workouts = ?;", (ps) -> {
+                ps.setInt(1, id);
+            });
+            return msg;
+        }
+        catch(DataAccessException dae){
+            System.out.println(dae.getMessage());
+            msg = "Erro ao excluir o treino";
+            return msg;
+        }
     }
 
     public static void deleteAll(JdbcTemplate jdbc, int idUser){

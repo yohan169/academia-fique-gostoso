@@ -22,6 +22,9 @@ public class AuthController {
     @GetMapping("/")
     public String index(Model model){
         model.addAttribute("users", User.read(jdbc));
+        if(msg != null){
+            msg = null;
+        }
         model.addAttribute("msg", msg);
         return "index";
     }
